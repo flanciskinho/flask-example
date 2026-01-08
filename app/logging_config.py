@@ -90,7 +90,7 @@ def setup_logging(env: str = None):
 
         # ── ROOT LOGGER ──
         "root": {
-            "handlers": ["console", "gunicorn_console"],
+            "handlers": ["console"],
             "level": "DEBUG" if is_dev else "INFO",
         },
     }
