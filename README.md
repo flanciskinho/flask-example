@@ -4,6 +4,7 @@ Esta es una aplicación de ejemplo en **Python + Flask**, lista para producción
 
 - Logging estructurado (JSON en producción, legible en desarrollo)
 - Request ID único por request para trazabilidad
+- Correlation ID para identificar un flujo de varias requests
 - Medición de **latencia / duration** por request
 - Configuración separada por entorno (dev/prod)
 - Compatible con Gunicorn y Docker
@@ -18,7 +19,7 @@ app/
 ├── templates # Plantillas HTML dinámicas usando Jinja2
 ├── config.py # Configuración de producción/desarrollo
 ├── logging_config.py # Configuración de logging (dev/prod)
-├── logging_filters.py # Filtro RequestIdFilter
+└── logging_filters.py # Filtro RequestIdFilter
 wsgi.py # Entrada WSGI para Gunicorn
 Dockerfile
 requirements.txt # librerías que utiliza la aplicación
@@ -64,7 +65,7 @@ docker run -it --rm \
 ```
 docker run -it --rm \
         -p 80:8000 \
-        -e FLASK_ENV=producction \
+        -e FLASK_ENV=production \
         -e SECRET_KEY=dev-secret-key \
         flask-prod
 ```

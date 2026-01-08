@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8000
 
 # Levantar la applicacion
-CMD ["gunicorn", "--log-level=info", "--logger-class", "gunicorn.glogging.Logger", "--bind", "0.0.0.0:8000", "wsgi:app"]
+CMD ["gunicorn", "--log-level=info", "--bind", "0.0.0.0:8000", "wsgi:app"]

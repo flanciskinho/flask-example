@@ -10,7 +10,9 @@ class RequestIdFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         if has_request_context():
             record.request_id = getattr(g, "request_id", "-")
+            record.correlation_id = getattr(g, "correlation_id", "-")
         else:
             record.request_id = "-"
+            record.correlation_id = "-"
 
         return True

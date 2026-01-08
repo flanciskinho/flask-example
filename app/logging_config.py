@@ -10,10 +10,13 @@ class DefaultingFormatter(jsonlogger.JsonFormatter):
     """
     Garantiza que todos los registros tengan los campos esperados,
     aunque falten, para evitar KeyError.
+    Por el memoento solo se comprueba request_id y correlation_id
     """
     def format(self, record):
         if not hasattr(record, "request_id"):
             record.request_id = "-"
+        if not hasattr(record, "correlation_id"):
+            record.correlation_id = "-"
         return super().format(record)
 
 
@@ -45,7 +48,7 @@ def setup_logging(env: str = None):
             },
             "json": {
                 "()": DefaultingFormatter,
-                "fmt": "%(asctime)s %(levelname)s %(name)s %(message)s %(request_id)s",
+                "fmt": "%(asctime)s %(levelname)s %(name)s %(message)s %(request_id)s %(correlation_id)s",
             },
         },
 
@@ -60,6 +63,7 @@ def setup_logging(env: str = None):
             "gunicorn_console": {  # Logs de Gunicorn
                 "class": "logging.StreamHandler",
                 "formatter": "dev" if is_dev else "json",
+                "filters": ["request_id"], # <-- para que los logs de los workets también sean json
                 "stream": "ext://sys.stdout",
             },
         },
@@ -77,11 +81,16 @@ def setup_logging(env: str = None):
                 "level": "INFO",
                 "propagate": False,
             },
+            "flask.app": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": False,
+            },
         },
 
         # ── ROOT LOGGER ──
         "root": {
-            "handlers": ["console"],
+            "handlers": ["console", "gunicorn_console"],
             "level": "DEBUG" if is_dev else "INFO",
         },
     }
