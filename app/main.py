@@ -40,7 +40,7 @@ def create_app(env: str = None) -> Flask:
             or str(uuid.uuid4())
         )
         g.correlation_id = request.headers.get("X-Correlation-ID") or g.request_id  # mismo para todo el flujo
-        g.start_time = time.time()
+        g.start_time = time.perf_counter()
 
         logger.info(
             "request",
@@ -62,7 +62,7 @@ def create_app(env: str = None) -> Flask:
         response.headers["X-Request-ID"] = getattr(g, "request_id", "-")
         response.headers["X-Correlation-ID"] = getattr(g, "correlation_id", "-")
 
-        duration = time.time() - g.start_time
+        duration = int((time.perf_counter() - g.start_time) * 1000)
         duration_ms = int(duration * 1000)
 
         log_data = {
