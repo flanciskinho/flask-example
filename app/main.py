@@ -2,9 +2,11 @@ import os
 import time
 import uuid
 import logging
-from flask import Flask, g, request, render_template
+from flask import Flask, g, request, render_template, jsonify
 from .logging_config import setup_logging
 from .config import DevConfig, ProdConfig
+from werkzeug.exceptions import HTTPException
+
 
 
 def create_app(env: str = None) -> Flask:
@@ -94,8 +96,49 @@ def create_app(env: str = None) -> Flask:
         logger.info("acceso a ping", extra={"request_id": g.request_id})
         return {"status": "ok"}
 
-    return app
+    # ──────────────── ERRORES ────────────────
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        """
+        Manejador global de excepciones:
+        - Logea el error en JSONL con request_id y correlation_id
+        - Devuelve respuesta JSON controlada al cliente
+        """
+        # Determinar código HTTP
+        code = getattr(e, "code", 500)  # Si la excepción tiene código HTTP, usarlo
+        message = getattr(e, "description", str(e))
 
+        # para evitar mostrar errores internos
+        if isinstance(e, HTTPException): 
+            code = e.code
+            message = e.description
+        else:
+            code = 500
+            message = "Internal server error"
+
+        # Log estructurado
+        logger.exception(
+            "Unhandled exception occurred",
+            extra={
+                "request_id": getattr(g, "request_id", "-"),
+                "correlation_id": getattr(g, "correlation_id", "-"),
+                "path": request.path,
+                "method": request.method,
+                "status": code,
+            }
+        )
+
+        # Respuesta JSON para el cliente
+        response = {
+            "status": "error",
+            "message": message,
+            "request_id": getattr(g, "request_id", "-"),
+            "correlation_id": getattr(g, "correlation_id", "-")
+        }
+
+        return jsonify(response), code    
+
+    return app
 
 # ──────────────── EJECUCIÓN LOCAL ────────────────
 

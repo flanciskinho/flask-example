@@ -9,6 +9,7 @@ Esta es una aplicación de ejemplo en **Python + Flask**, lista para producción
 - Configuración separada por entorno (dev/prod)
 - Compatible con Gunicorn y Docker
 - Preparada para centralización de logs y trazabilidad
+- Creado manejador de erroes global
 
 ## Estructura del proyecto
 
